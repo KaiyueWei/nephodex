@@ -55,6 +55,25 @@ except Exception:  # pragma: no cover
         return func
 
 
+# Workaround for a gradio 4.44 / gradio_client 1.3 bug: the API-schema parser
+# (json_schema_to_python_type -> get_type) does `"const" in schema` and crashes
+# with "argument of type 'bool' is not iterable" when a component schema has a
+# boolean `additionalProperties`. That 500s the main route, so the Space reports
+# RUNNING but serves 503. Treat bool schemas as "Any" to neutralise it.
+import gradio_client.utils as _gc_utils
+
+_orig_js2pt = _gc_utils._json_schema_to_python_type
+
+
+def _safe_js2pt(schema, defs=None):
+    if isinstance(schema, bool):
+        return "Any"
+    return _orig_js2pt(schema, defs)
+
+
+_gc_utils._json_schema_to_python_type = _safe_js2pt
+
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE = torch.bfloat16 if device == "cuda" else torch.float32
 
@@ -429,4 +448,4 @@ with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
 
 
 if __name__ == "__main__":
-    app.launch()
+    app.launch(server_name="0.0.0.0", server_port=7860)
