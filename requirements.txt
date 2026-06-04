@@ -2,14 +2,14 @@
 # Canonical dependency list (the Space builds from this file).
 # Local dev: `uv venv && uv pip install -r requirements.txt`
 
-# --- Pinned, mutually-compatible early-2025 stack ---
-# The interlock: gradio 4.44 imports HfFolder -> needs huggingface_hub<1.0;
-# SmolVLM2 needs transformers>=4.49; transformers 4.49 also caps hub<1.0.
-# Leaving these unpinned pulls huggingface_hub 1.x and breaks gradio's import.
+# --- Pinned, mutually-compatible 2025 stack ---
+# The interlock: gradio 4.44 imports HfFolder -> needs huggingface_hub<1.0.
+# SmolVLM2's `smolvlm` model type isn't registered until transformers 4.50;
+# 4.51 knows it and still caps hub<1.0 (needs hub>=0.30). This set agrees.
 gradio==4.44.0          # pin matches README sdk_version
-huggingface_hub==0.26.5
-transformers==4.49.0    # first stable release with SmolVLM2 support
-accelerate==1.3.0
+huggingface_hub==0.30.2
+transformers==4.51.3    # recognizes the `smolvlm` architecture; still hub<1.0
+accelerate==1.6.0
 num2words               # SmolVLM2 processor dependency on some transformers versions
 
 # --- Image + similarity (loose pins fine; no hub interlock) ---
