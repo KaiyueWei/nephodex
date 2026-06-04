@@ -233,9 +233,14 @@ def process_pipeline(uploaded_image, click_xy, collection):
     return sticker, report, pending, gr.update(interactive=True)
 
 
+def _counter_html(n: int) -> str:
+    """The 'Specimens' tally chip in the header."""
+    return f'<div class="nx-counter"><div class="n">{n}</div><div class="l">Specimens</div></div>'
+
+
 def save_to_album(pending, collection):
     if pending is None:
-        return collection, gr.update(), gr.update(interactive=False)
+        return collection, gr.update(), gr.update(interactive=False), gr.update()
     collection = collection + [pending]
     gallery = [
         (
@@ -244,7 +249,7 @@ def save_to_album(pending, collection):
         )
         for it in collection
     ]
-    return collection, gallery, gr.update(interactive=False)
+    return collection, gallery, gr.update(interactive=False), _counter_html(len(collection))
 
 
 def on_select(evt: gr.SelectData):
@@ -258,41 +263,100 @@ def on_new_image(_):
 # -------------------------------------------------------------------------
 # 4. UI  (custom styling -> targets the "Off-Brand" badge)
 # -------------------------------------------------------------------------
+# Design tokens + layout ported from doc/nephodex_demo.html (the mockup).
 CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Karla:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Karla:wght@400;500;600;700&display=swap');
 
-.gradio-container {
-    background:
-        radial-gradient(1200px 600px at 75% -10%, #f6c66b33, transparent),
-        radial-gradient(900px 500px at 10% 0%, #c98bd633, transparent),
-        linear-gradient(180deg, #1b2a4a 0%, #243a63 45%, #3a4f7a 100%) !important;
-    font-family: 'Karla', sans-serif !important;
-    color: #f3ecdd !important;
+:root{
+  --ink:#f4eddd; --muted:#cfc7b6;
+  --sky1:#16233f; --sky2:#26375f; --sky3:#5b446f;
+  --sun:#f6c66b; --ember:#e8884c; --gold:#e8a73c;
+  --card:#f4eddd; --card-ink:#2a3147; --card-sub:#5d6478;
 }
-#sky-title {
-    font-family: 'Fraunces', serif !important;
-    font-weight: 700; font-size: 2.7rem; line-height: 1.05;
-    color: #f7e7c4 !important; letter-spacing: -0.5px; margin-bottom: 0;
-    text-shadow: 0 2px 18px #0006;
+
+/* ---- the twilight canvas ---- */
+.gradio-container{
+  max-width:1080px !important; margin:0 auto !important;
+  font-family:'Karla',system-ui,sans-serif !important; color:var(--ink) !important;
+  background:
+    radial-gradient(900px 520px at 82% -8%, #f6c66b44, transparent 60%),
+    radial-gradient(760px 520px at 6% 4%, #b07bd633, transparent 60%),
+    radial-gradient(600px 400px at 50% 120%, #e8884c22, transparent 60%),
+    linear-gradient(178deg,var(--sky1) 0%,var(--sky2) 48%,var(--sky3) 100%) !important;
+  background-attachment:fixed !important;
 }
-#sky-sub { color: #d9d2c4 !important; font-size: 1.02rem; max-width: 60ch; }
-.block, .gr-box, .gr-panel {
-    background: #f3ecddee !important;
-    border: 1px solid #f7e7c455 !important;
-    border-radius: 18px !important;
-    box-shadow: 0 8px 30px #0a142e55 !important;
+/* film grain */
+.gradio-container::before{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.05; z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.gr-button-primary {
-    background: linear-gradient(135deg, #e8a73c, #d98032) !important;
-    border: none !important; color: #2a1c08 !important; font-weight: 600 !important;
-    border-radius: 999px !important;
-}
-.gr-button-secondary {
-    background: #243a63 !important; color: #f7e7c4 !important;
-    border: 1px solid #f7e7c455 !important; border-radius: 999px !important;
-}
-label span { color: #2a3147 !important; font-weight: 600 !important; }
-.tabitem { border-radius: 18px !important; }
+/* strip default block chrome so the sky shows through */
+.gradio-container .block,
+.gradio-container .form,
+.gradio-container .panel,
+.gradio-container .gap{ background:transparent !important; border:none !important; box-shadow:none !important; }
+.gradio-container label span{ color:var(--ink) !important; font-weight:600 !important; }
+.gradio-container .prose{ color:var(--ink); }
+
+/* ---- header ---- */
+#nx-brand{ font-family:'Fraunces',serif; font-weight:700; font-size:clamp(2.4rem,5vw,3.4rem);
+  line-height:.95; letter-spacing:-1px; color:var(--sun); text-shadow:0 3px 24px #0007; margin:0; }
+#nx-brand span{ font-style:italic; color:var(--ink); }
+#nx-sub{ margin-top:8px; color:var(--muted); max-width:46ch; font-size:1.02rem; }
+.nx-counter{ background:#0e1830aa; border:1px solid #f6c66b44; border-radius:16px; padding:12px 18px;
+  text-align:center; backdrop-filter:blur(6px); display:inline-block; }
+.nx-counter .n{ font-family:'Fraunces',serif; font-size:2rem; color:var(--sun); line-height:1; }
+.nx-counter .l{ font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+
+/* ---- pill tabs ---- */
+.gradio-container .tab-nav{ border:none !important; gap:8px; margin:18px 0; }
+.gradio-container .tab-nav button{
+  font-family:'Karla'; font-weight:700; font-size:.95rem; color:var(--muted) !important;
+  background:#0e183055 !important; border:1px solid #ffffff14 !important;
+  padding:10px 20px !important; border-radius:999px !important; }
+.gradio-container .tab-nav button.selected{
+  background:linear-gradient(135deg,var(--gold),var(--ember)) !important; color:#2a1c08 !important;
+  border-color:transparent !important; }
+
+/* ---- buttons ---- */
+.gradio-container button.primary{
+  background:linear-gradient(135deg,var(--gold),var(--ember)) !important; color:#2a1c08 !important;
+  border:none !important; border-radius:999px !important; font-weight:700 !important;
+  box-shadow:0 8px 22px #e8884c44 !important; }
+.gradio-container button.secondary{
+  background:#0e183066 !important; color:var(--ink) !important; border:1px solid #ffffff22 !important;
+  border-radius:999px !important; font-weight:700 !important; }
+
+/* ---- cream result card ---- */
+#nx-result{
+  background:var(--card) !important; color:var(--card-ink) !important; border-radius:22px !important;
+  padding:22px !important; box-shadow:0 18px 50px #0a1228aa !important; border:1px solid #ffffff55 !important; }
+#nx-result .prose, #nx-result p, #nx-result strong{ color:var(--card-ink) !important; }
+#nx-result :is(h1,h2,h3){ font-family:'Fraunces',serif !important; color:var(--card-ink) !important; }
+#nx-result em, #nx-result i{ color:var(--card-sub) !important; }
+
+/* ---- checkerboard sticker stage ---- */
+#nx-sticker, #nx-sticker .image-container{
+  border-radius:16px !important;
+  background-image:
+    linear-gradient(45deg,#00000010 25%,transparent 25%,transparent 75%,#00000010 75%),
+    linear-gradient(45deg,#00000010 25%,transparent 25%,transparent 75%,#00000010 75%) !important;
+  background-size:16px 16px !important; background-position:0 0,8px 8px !important; }
+
+/* ---- dex gallery cards ---- */
+#nx-dex .grid-wrap{ background:transparent !important; }
+#nx-dex .thumbnail-item{
+  background:var(--card) !important; border-radius:18px !important;
+  box-shadow:0 12px 30px #0a122888 !important; border:1px solid #ffffff55 !important; }
+#nx-dex .caption{ font-family:'Fraunces',serif !important; color:var(--card-ink) !important; }
+
+footer{ display:none !important; }
+"""
+
+HEADER_HTML = """
+<h1 id="nx-brand">Nepho<span>dex</span></h1>
+<p id="nx-sub">A field journal for cloud-gazers. Snap the sky, click the cloud you
+mean, and a small local model isolates it, names the shape it sees, and files it in your dex.</p>
 """
 
 with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
@@ -300,29 +364,35 @@ with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
     pending_card = gr.State(None)
     click_state = gr.State(None)
 
-    gr.Markdown("# ☁️ Nephodex", elem_id="sky-title")
-    gr.Markdown(
-        "_A field journal for cloud-gazers._ Snap the sky, **click the cloud "
-        "you mean**, and a small local model isolates it, names the shape it "
-        "sees, and files it in your dex.",
-        elem_id="sky-sub",
-    )
+    with gr.Row():
+        with gr.Column(scale=4):
+            gr.HTML(HEADER_HTML)
+        with gr.Column(scale=1, min_width=150):
+            counter_view = gr.HTML(_counter_html(0))
 
     with gr.Tab("🔭 Capture"):
         with gr.Row():
             with gr.Column():
-                input_view = gr.Image(type="pil", label="Sky capture (webcam supported)")
+                input_view = gr.Image(
+                    type="pil", label="Sky capture (webcam supported)", elem_id="nx-view"
+                )
                 click_status = gr.Markdown("Click the cloud you want, then Scan.")
                 scan_btn = gr.Button("🔍 Isolate & name this cloud", variant="primary")
             with gr.Column():
-                crop_view = gr.Image(type="pil", label="Specimen sticker (.png)")
-                details_view = gr.Markdown("Your reading will appear here.")
-                add_btn = gr.Button("✨ File in my Nephodex", variant="secondary", interactive=False)
+                crop_view = gr.Image(
+                    type="pil", label="Specimen sticker (.png)", elem_id="nx-sticker"
+                )
+                details_view = gr.Markdown(
+                    "Your reading will appear here.", elem_id="nx-result"
+                )
+                add_btn = gr.Button(
+                    "✨ File in my Nephodex", variant="primary", interactive=False
+                )
 
     with gr.Tab("📔 My Nephodex"):
         album_gallery = gr.Gallery(
             label="Collected specimens", columns=[4], rows=[2],
-            object_fit="contain", height="600px",
+            object_fit="contain", height="600px", elem_id="nx-dex",
         )
 
     # Capture click coordinates for the SAM point prompt.
@@ -337,7 +407,7 @@ with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
     add_btn.click(
         save_to_album,
         inputs=[pending_card, collection_state],
-        outputs=[collection_state, album_gallery, add_btn],
+        outputs=[collection_state, album_gallery, add_btn, counter_view],
     )
 
 

@@ -84,7 +84,8 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 
 **Sat Jun 6 — custom UI.**
 
-* [ ] Fold the mockup styling into the Gradio CSS: twilight palette, Fraunces/Karla, dex cards, rarity chips, specimen counter, checkerboard sticker stage.
+* [x] Fold the mockup styling into the Gradio CSS: twilight palette + grain, Fraunces/Karla, brand header, specimen counter, pill tabs, gradient buttons, cream result card, checkerboard sticker stage, dex cards. *(Ported Jun 4 from `doc/nephodex_demo.html`.)*
+* [ ] **Verify live on the Space** — some Gradio 4.44 internal selectors (`.thumbnail-item`, `.caption`, `.tab-nav button.selected`) may need a nudge once rendered. (Rarity chips skipped: the real pipeline has no rarity signal — the genus chip plays that role.)
 
 * **Done when:** the live Space visibly matches the mockup. → **Off-Brand secured.**
 
