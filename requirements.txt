@@ -2,13 +2,14 @@
 # Canonical dependency list (the Space builds from this file).
 # Local dev: `uv venv && uv pip install -r requirements.txt`
 #
-# gradio is provided by the Space's `sdk_version` (see README) — NOT pinned here,
-# to avoid fighting the SDK's own resolution. Everything below is a coherent
-# modern stack: transformers 5 knows SmolVLM2; huggingface_hub 1.x suits both
-# gradio 6 and transformers 5.
+# gradio is provided by the Space's `sdk_version` (see README: 5.38.2) — NOT
+# pinned here, to avoid fighting the SDK's own resolution. This set was resolved
+# with `uv pip compile` and verified: transformers 4.51.3 loads the SmolVLM2
+# processor (5.x regressed it); gradio 5.38 fixes the 4.44 runtime bugs while
+# still allowing huggingface_hub<1.0, which transformers 4.51.3 requires.
 
-transformers==5.10.2
-huggingface_hub==1.17.0
+transformers==4.51.3
+huggingface_hub==0.30.2
 accelerate==1.13.0
 num2words               # SmolVLM2 processor dependency on some transformers versions
 
