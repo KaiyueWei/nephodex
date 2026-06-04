@@ -20,6 +20,7 @@ Notes
 """
 
 import os
+import glob
 import json
 import re
 
@@ -359,6 +360,14 @@ HEADER_HTML = """
 mean, and a small local model isolates it, names the shape it sees, and files it in your dex.</p>
 """
 
+# Sample skies shipped in assets/ -> one-click examples (great for judges with no
+# photo handy). Degrades gracefully to an empty list if the folder is missing.
+EXAMPLE_PHOTOS = sorted(
+    glob.glob(os.path.join("assets", "*.jpeg"))
+    + glob.glob(os.path.join("assets", "*.jpg"))
+    + glob.glob(os.path.join("assets", "*.png"))
+)
+
 with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
     collection_state = gr.State([])
     pending_card = gr.State(None)
@@ -377,6 +386,11 @@ with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
                     type="pil", label="Sky capture (webcam supported)", elem_id="nx-view"
                 )
                 click_status = gr.Markdown("Click the cloud you want, then Scan.")
+                if EXAMPLE_PHOTOS:
+                    gr.Examples(
+                        examples=EXAMPLE_PHOTOS, inputs=input_view,
+                        label="Tap a sample sky", examples_per_page=8,
+                    )
                 scan_btn = gr.Button("🔍 Isolate & name this cloud", variant="primary")
             with gr.Column():
                 crop_view = gr.Image(

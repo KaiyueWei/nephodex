@@ -69,7 +69,7 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 * [x] Registered (confirmed Jun 4). Hugging Face credits + Modal credits secured.
 * [x] **De-risk the dataset — DECIDED (Jun 4):** `DATASET = CCSN` via the Hub mirror **`aduuuuuu/CCSN`** (`load_dataset`, parquet, 104 MB, MIT, 2,543 imgs / 11 classes). **HBMCD rejected:** no public download (requires contacting BJUT) — too risky for a 10-day solo window; its only edge was size, which a ViT-Tiny head doesn't need. CCSN is one-line loadable, MIT-licensed, and lives in the same HF ecosystem the Modal job pulls from. Two trivial follow-ups on Jun 7: (1) it ships a single `train` split → do a stratified 80/10/10 split yourself; (2) verify `id2label` after load (mirror README is empty). Backups if the mirror looks off: Kaggle (`mmichelli/cirrus-cumulus-stratus-nimbus-ccsn-database`) and Harvard Dataverse (`doi:10.7910/DVN/CADDPD`).
 * [ ] Training runs on **Modal** (credits secured) — a GPU function trains and pushes straight to the Hub; no Colab session timeouts.
-* [ ] Shoot/collect 10–15 of your own sky photos → `assets/`.
+* [x] Shoot/collect 10–15 of your own sky photos → `assets/`. *(16 photos added Jun 4, resized to 1600px ~7 MB; wired as one-click `gr.Examples` in app.py.)*
 * [ ] Re-read the HTML mockup; the CSS variables at its top are your design tokens.
 
 ### Weekend 1 — the core (priority order; ship something every day)
