@@ -18,7 +18,7 @@ import torch
 from PIL import Image
 
 # Override with the env var if your Hub username/repo differs.
-MODEL_ID = os.environ.get("GENUS_MODEL_ID", "KaiyueWei/nephodex-cloud-genus")
+MODEL_ID = os.environ.get("GENUS_MODEL_ID", "kaiyuewei2026/nephodex-cloud-genus")
 
 # Returned until real weights land (lets app.py ship stage 4 early).
 _STUB: tuple[str, float] = ("unidentified", 0.0)

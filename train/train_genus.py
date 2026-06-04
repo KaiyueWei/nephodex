@@ -22,7 +22,7 @@ import os
 # Defaults (override via CLI or env). Keep repo id in sync with genus.py.
 DATASET_ID = os.environ.get("GENUS_DATASET_ID", "aduuuuuu/CCSN")
 BASE_MODEL = os.environ.get("GENUS_BASE_MODEL", "facebook/deit-tiny-patch16-224")
-REPO_ID = os.environ.get("GENUS_MODEL_ID", "KaiyueWei/nephodex-cloud-genus")
+REPO_ID = os.environ.get("GENUS_MODEL_ID", "kaiyuewei2026/nephodex-cloud-genus")
 GPU = os.environ.get("GENUS_GPU", "t4")
 SEED = 42
 
