@@ -39,6 +39,8 @@ from transformers import (
     AutoModelForImageTextToText,
 )
 
+from genus import classify_genus  # stage 4: fine-tuned genus (stub until weights land)
+
 # Optional ZeroGPU support. On a normal GPU/CPU Space `spaces` is absent and the
 # decorator becomes a no-op.
 try:
@@ -208,6 +210,7 @@ def process_pipeline(uploaded_image, click_xy, collection):
             best_sim, match_name = sim, item["nickname"]
 
     nickname, description = generate_cloud_lore(sticker)
+    genus, genus_conf = classify_genus(_flatten_on_white(sticker))
 
     if not collection:
         verdict = "🌱 **First cloud found!** Your Nephodex has begun."
@@ -216,8 +219,17 @@ def process_pipeline(uploaded_image, click_xy, collection):
     else:
         verdict = f"✨ **New specimen!** Closest match in your dex is only {best_sim*100:.0f}%."
 
-    report = f"## ☁️ {nickname}\n\n*{description}*\n\n---\n{verdict}"
-    pending = {"image": sticker, "nickname": nickname, "embedding": emb}
+    # Surface the fine-tuned genus when available (stub returns conf 0.0 -> hidden).
+    genus_line = f"\n\n🔬 likely **{genus}** ({genus_conf*100:.0f}%)" if genus_conf > 0 else ""
+
+    report = f"## ☁️ {nickname}\n\n*{description}*{genus_line}\n\n---\n{verdict}"
+    pending = {
+        "image": sticker,
+        "nickname": nickname,
+        "embedding": emb,
+        "genus": genus,
+        "genus_conf": genus_conf,
+    }
     return sticker, report, pending, gr.update(interactive=True)
 
 
@@ -225,7 +237,13 @@ def save_to_album(pending, collection):
     if pending is None:
         return collection, gr.update(), gr.update(interactive=False)
     collection = collection + [pending]
-    gallery = [(it["image"], it["nickname"]) for it in collection]
+    gallery = [
+        (
+            it["image"],
+            it["nickname"] + (f" · {it['genus']}" if it.get("genus_conf", 0) > 0 else ""),
+        )
+        for it in collection
+    ]
     return collection, gallery, gr.update(interactive=False)
 
 

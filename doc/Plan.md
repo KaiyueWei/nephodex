@@ -66,7 +66,7 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 
 ### Phase 0 — June 4 (today, planning only — do NOT build the app yet)
 
-* [ ] Confirm you registered before the June 3 deadline; if you missed it, check whether the org still accepts joins.
+* [x] Registered (confirmed Jun 4). Hugging Face credits + Modal credits secured.
 * [x] **De-risk the dataset — DECIDED (Jun 4):** `DATASET = CCSN` via the Hub mirror **`aduuuuuu/CCSN`** (`load_dataset`, parquet, 104 MB, MIT, 2,543 imgs / 11 classes). **HBMCD rejected:** no public download (requires contacting BJUT) — too risky for a 10-day solo window; its only edge was size, which a ViT-Tiny head doesn't need. CCSN is one-line loadable, MIT-licensed, and lives in the same HF ecosystem the Modal job pulls from. Two trivial follow-ups on Jun 7: (1) it ships a single `train` split → do a stratified 80/10/10 split yourself; (2) verify `id2label` after load (mirror README is empty). Backups if the mirror looks off: Kaggle (`mmichelli/cirrus-cumulus-stratus-nimbus-ccsn-database`) and Harvard Dataverse (`doi:10.7910/DVN/CADDPD`).
 * [ ] Training runs on **Modal** (credits secured) — a GPU function trains and pushes straight to the Hub; no Colab session timeouts.
 * [ ] Shoot/collect 10–15 of your own sky photos → `assets/`.
@@ -96,8 +96,8 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 
 ### Weekdays — Jun 8–11: integrate & harden
 
-* [ ] Add `genus.py` and wire the classifier into `app.py` as stage 4 (see §5).
-* [ ] Surface the genus label on the result card and dex entries.
+* [x] Add `genus.py` and wire the classifier into `app.py` as stage 4 (see §5). *(Scaffolded Jun 4: lazy-load + stub fallback, so it works before weights land.)*
+* [x] Surface the genus label on the result card and dex entries. *(Result card shows "🔬 likely {genus} ({conf}%)"; dex caption appends the genus.)*
 * [ ] Robustness: no-cloud-found fallback, webcam capture, mobile layout.
 * [ ] Keep **one buffer day** (Jun 11) for whatever broke.
 
