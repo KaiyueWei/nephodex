@@ -76,11 +76,11 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 
 **Fri Jun 5 — zero-shot pipeline live.** *Riskiest thing first.*
 
-* [ ] Create the Space — use a **credit-covered GPU Space** (HF credits secured); this also removes the ZeroGPU device-placement risk entirely.
-* [ ] Deploy `app.py`; get segment → name → collect working end to end.
-* [ ] **De-risk the SmolVLM2 processor call** — that's the single most fragile line; if it errors, fix today.
+* [x] Create the Space — `kaiyuewei2026/nephodex` on a credit-covered **t4-small** GPU Space.
+* [x] Deploy `app.py`; segment → name → collect working end to end (confirmed live Jun 4).
+* [x] **De-risk the SmolVLM2 processor call** — works. Settled the dep stack: **gradio 5.38.2 + transformers 4.51.3 + huggingface_hub 0.30.2** (transformers 5 regressed the SmolVLM2 processor; verified locally with `uv pip compile`). Also swapped MobileSAM → **SlimSAM-77** (the original repo wasn't HF-format).
 
-* **Done when:** you can upload a photo, click a cloud, and get a named sticker in the dex. → **Off the Grid secured.**
+* **Done when:** you can upload a photo, click a cloud, and get a named sticker in the dex. → ✅ **Off the Grid SECURED (Jun 4).**
 
 **Sat Jun 6 — custom UI.**
 
