@@ -3,12 +3,12 @@ Nephodex — The Semantic Cloud Pokédex
 Build Small Hackathon prototype (Chapter Two: An Adventure in Thousand Token Wood)
 
 Pipeline (all local, no cloud APIs -> targets the "Off the Grid" badge):
-  MobileSAM  -> isolate the cloud you click on
+  SlimSAM    -> isolate the cloud you click on
   OpenCV     -> alpha-matte the mask into a transparent .png "sticker"
   CLIP       -> embed the sticker, compare against your collection
   SmolVLM2   -> a small (~2.2B) local vision-language model names the shape
 
-Total params well under the 32B cap: MobileSAM (tiny) + CLIP ViT-B/32 (~0.15B)
+Total params well under the 32B cap: SlimSAM (~0.08B) + CLIP ViT-B/32 (~0.15B)
 + SmolVLM2-2.2B (~2.2B).
 
 Notes
@@ -61,13 +61,16 @@ DTYPE = torch.bfloat16 if device == "cuda" else torch.float32
 # -------------------------------------------------------------------------
 # 1. Model loading (once, at import)
 # -------------------------------------------------------------------------
-SAM_ID = "dhkim2810/MobileSAM"
+# Tiny transformers-native SAM. (The original dhkim2810/MobileSAM repo stores a raw
+# .pt checkpoint, not an HF-format model, so SamModel.from_pretrained can't read it.)
+SAM_ID = "Zigeng/SlimSAM-uniform-77"
+SAM_PROCESSOR_ID = "facebook/sam-vit-base"  # SAM processors are variant-agnostic
 CLIP_ID = "openai/clip-vit-base-patch32"
 VLM_ID = "HuggingFaceTB/SmolVLM2-2.2B-Instruct"  # swap for Moondream2 / Qwen2.5-VL-7B
 
-print("Loading MobileSAM…")
+print("Loading SlimSAM…")
 sam_model = SamModel.from_pretrained(SAM_ID).to(device)
-sam_processor = SamProcessor.from_pretrained(SAM_ID)
+sam_processor = SamProcessor.from_pretrained(SAM_PROCESSOR_ID)
 
 print("Loading CLIP…")
 clip_model = CLIPModel.from_pretrained(CLIP_ID).to(device)

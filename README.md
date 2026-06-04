@@ -25,7 +25,7 @@ dex. Built for the [Build Small Hackathon](https://huggingface.co/build-small-ha
 
 | Stage                                  | Model                                 | Params |
 | ---------------------------------------- | --------------------------------------- | -------- |
-| Isolate the clicked cloud              | MobileSAM (`dhkim2810/MobileSAM`) | tiny   |
+| Isolate the clicked cloud              | SlimSAM (`Zigeng/SlimSAM-uniform-77`) | ~0.08B |
 | Alpha-matte into a transparent sticker | OpenCV                                | —     |
 | Embed + compare to your collection     | CLIP ViT-B/32                         | ~0.15B |
 | Name the shape                         | SmolVLM2-2.2B-Instruct                | ~2.2B  |
