@@ -2,16 +2,19 @@
 # Canonical dependency list (the Space builds from this file).
 # Local dev: `uv venv && uv pip install -r requirements.txt`
 
+# --- Pinned, mutually-compatible early-2025 stack ---
+# The interlock: gradio 4.44 imports HfFolder -> needs huggingface_hub<1.0;
+# SmolVLM2 needs transformers>=4.49; transformers 4.49 also caps hub<1.0.
+# Leaving these unpinned pulls huggingface_hub 1.x and breaks gradio's import.
 gradio==4.44.0          # pin matches README sdk_version
+huggingface_hub==0.26.5
+transformers==4.49.0    # first stable release with SmolVLM2 support
+accelerate==1.3.0
+num2words               # SmolVLM2 processor dependency on some transformers versions
 
-# ML / pipeline
-torch
-transformers           # PIN exact version on Jun 5 once the SmolVLM2 processor call is verified (top risk)
-accelerate             # smoother large-model loading / device placement
-num2words              # SmolVLM2 processor dependency on some transformers versions
-
-# Image + similarity
-opencv-python-headless # headless: no GUI libs, correct for a Space
+# --- Image + similarity (loose pins fine; no hub interlock) ---
+torch                   # Space provides the matching CUDA build
+opencv-python-headless  # headless: no GUI libs, correct for a Space
 numpy
 pillow
-scikit-learn           # cosine_similarity for the "seen this before?" check
+scikit-learn            # cosine_similarity for the "seen this before?" check
