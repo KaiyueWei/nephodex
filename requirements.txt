@@ -1,18 +1,17 @@
 # Nephodex — Hugging Face Gradio Space dependencies.
 # Canonical dependency list (the Space builds from this file).
 # Local dev: `uv venv && uv pip install -r requirements.txt`
+#
+# gradio is provided by the Space's `sdk_version` (see README) — NOT pinned here,
+# to avoid fighting the SDK's own resolution. Everything below is a coherent
+# modern stack: transformers 5 knows SmolVLM2; huggingface_hub 1.x suits both
+# gradio 6 and transformers 5.
 
-# --- Pinned, mutually-compatible 2025 stack ---
-# The interlock: gradio 4.44 imports HfFolder -> needs huggingface_hub<1.0.
-# SmolVLM2's `smolvlm` model type isn't registered until transformers 4.50;
-# 4.51 knows it and still caps hub<1.0 (needs hub>=0.30). This set agrees.
-gradio==4.44.0          # pin matches README sdk_version
-huggingface_hub==0.30.2
-transformers==4.51.3    # recognizes the `smolvlm` architecture; still hub<1.0
-accelerate==1.6.0
+transformers==5.10.2
+huggingface_hub==1.17.0
+accelerate==1.13.0
 num2words               # SmolVLM2 processor dependency on some transformers versions
 
-# --- Image + similarity (loose pins fine; no hub interlock) ---
 torch                   # Space provides the matching CUDA build
 opencv-python-headless  # headless: no GUI libs, correct for a Space
 numpy

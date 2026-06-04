@@ -55,23 +55,22 @@ except Exception:  # pragma: no cover
         return func
 
 
-# Workaround for a gradio 4.44 / gradio_client 1.3 bug: the API-schema parser
-# (json_schema_to_python_type -> get_type) does `"const" in schema` and crashes
-# with "argument of type 'bool' is not iterable" when a component schema has a
-# boolean `additionalProperties`. That 500s the main route, so the Space reports
-# RUNNING but serves 503. Treat bool schemas as "Any" to neutralise it.
-import gradio_client.utils as _gc_utils
+# Defensive shim for a historical gradio_client schema-parser crash on boolean
+# `additionalProperties` ("argument of type 'bool' is not iterable"). Fixed in
+# modern gradio, but harmless to keep; guarded so it no-ops if internals differ.
+try:
+    import gradio_client.utils as _gc_utils
 
-_orig_js2pt = _gc_utils._json_schema_to_python_type
+    _orig_js2pt = _gc_utils._json_schema_to_python_type
 
+    def _safe_js2pt(schema, defs=None):
+        if isinstance(schema, bool):
+            return "Any"
+        return _orig_js2pt(schema, defs)
 
-def _safe_js2pt(schema, defs=None):
-    if isinstance(schema, bool):
-        return "Any"
-    return _orig_js2pt(schema, defs)
-
-
-_gc_utils._json_schema_to_python_type = _safe_js2pt
+    _gc_utils._json_schema_to_python_type = _safe_js2pt
+except Exception:  # pragma: no cover
+    pass
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -427,8 +426,8 @@ with gr.Blocks(theme=gr.themes.Soft(), css=CSS, title="Nephodex") as app:
 
     with gr.Tab("📔 My Nephodex"):
         album_gallery = gr.Gallery(
-            label="Collected specimens", columns=[4], rows=[2],
-            object_fit="contain", height="600px", elem_id="nx-dex",
+            label="Collected specimens", columns=4,
+            object_fit="contain", height=600, elem_id="nx-dex",
         )
 
     # Capture click coordinates for the SAM point prompt.
