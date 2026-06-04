@@ -67,7 +67,7 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 ### Phase 0 — June 4 (today, planning only — do NOT build the app yet)
 
 * [ ] Confirm you registered before the June 3 deadline; if you missed it, check whether the org still accepts joins.
-* [ ] **De-risk the dataset:** confirm you can actually download  **HBMCD** . If not, switch to **CCSN** (publicly available, ~11 genera) — identical job for the badge. Decide  *now* , write the choice here: `DATASET = ____`.
+* [x] **De-risk the dataset — DECIDED (Jun 4):** `DATASET = CCSN` via the Hub mirror **`aduuuuuu/CCSN`** (`load_dataset`, parquet, 104 MB, MIT, 2,543 imgs / 11 classes). **HBMCD rejected:** no public download (requires contacting BJUT) — too risky for a 10-day solo window; its only edge was size, which a ViT-Tiny head doesn't need. CCSN is one-line loadable, MIT-licensed, and lives in the same HF ecosystem the Modal job pulls from. Two trivial follow-ups on Jun 7: (1) it ships a single `train` split → do a stratified 80/10/10 split yourself; (2) verify `id2label` after load (mirror README is empty). Backups if the mirror looks off: Kaggle (`mmichelli/cirrus-cumulus-stratus-nimbus-ccsn-database`) and Harvard Dataverse (`doi:10.7910/DVN/CADDPD`).
 * [ ] Training runs on **Modal** (credits secured) — a GPU function trains and pushes straight to the Hub; no Colab session timeouts.
 * [ ] Shoot/collect 10–15 of your own sky photos → `assets/`.
 * [ ] Re-read the HTML mockup; the CSS variables at its top are your design tokens.
@@ -118,8 +118,9 @@ Published separately to the Hub: `your-username/nephodex-cloud-genus` (the fine-
 
 ## 4. Fine-tuning sub-plan (Well-Tuned)
 
-**Dataset:** HBMCD if obtainable, else CCSN (decide in Phase 0). Both label ground-based
-sky photos into ~10–11 cloud genera (cumulus, cirrus, stratus, …). Standard split 80/10/10.
+**Dataset:** **CCSN** (decided Jun 4 — see Phase 0), loaded from `aduuuuuu/CCSN` on the Hub.
+2,543 ground-based sky photos labelled into 11 classes (10 WMO genera + contrails). Ships a
+single `train` split → make a stratified 80/10/10 split yourself.
 
 **Backbone:** a small pretrained image model fine-tuned with a new classification head —
 `facebook/deit-tiny-patch16-224` (~5M) or a `timm` ViT-Tiny. Keeps you far under the cap

@@ -1,0 +1,17 @@
+# Nephodex — Hugging Face Gradio Space dependencies.
+# Canonical dependency list (the Space builds from this file).
+# Local dev: `uv venv && uv pip install -r requirements.txt`
+
+gradio==4.44.0          # pin matches README sdk_version
+
+# ML / pipeline
+torch
+transformers           # PIN exact version on Jun 5 once the SmolVLM2 processor call is verified (top risk)
+accelerate             # smoother large-model loading / device placement
+num2words              # SmolVLM2 processor dependency on some transformers versions
+
+# Image + similarity
+opencv-python-headless # headless: no GUI libs, correct for a Space
+numpy
+pillow
+scikit-learn           # cosine_similarity for the "seen this before?" check

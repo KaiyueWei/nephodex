@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nephodex — demo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Karla:wght@400;500;600;700&display=swap');
+
+:root{
+  --ink:#f4eddd; --muted:#cfc7b6;
+  --sky1:#16233f; --sky2:#26375f; --sky3:#5b446f;
+  --sun:#f6c66b; --ember:#e8884c; --gold:#e8a73c;
+  --card:#f4eddd; --card-ink:#2a3147; --card-sub:#5d6478;
+  --rare:#5b8def; --uncommon:#5bb98a; --epic:#b07bd6; --common:#9aa1b2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{
+  font-family:'Karla',system-ui,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 520px at 82% -8%, #f6c66b44, transparent 60%),
+    radial-gradient(760px 520px at 6% 4%, #b07bd633, transparent 60%),
+    radial-gradient(600px 400px at 50% 120%, #e8884c22, transparent 60%),
+    linear-gradient(178deg,var(--sky1) 0%,var(--sky2) 48%,var(--sky3) 100%);
+  background-attachment:fixed;
+  min-height:100vh; padding:34px 22px 70px;
+  overflow-x:hidden;
+}
+/* grain overlay */
+body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.05; z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.5;animation:tw 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.7;transform:scale(1)}}
+
+.wrap{max-width:1080px;margin:0 auto;position:relative;z-index:1}
+
+/* header */
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  opacity:0;animation:rise .8s .05s cubic-bezier(.2,.8,.2,1) forwards}
+.brand h1{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(2.4rem,5vw,3.4rem);
+  line-height:.95;letter-spacing:-1px;color:var(--sun);text-shadow:0 3px 24px #0007}
+.brand h1 .cloud{font-style:italic;color:var(--ink)}
+.brand p{margin-top:8px;color:var(--muted);max-width:46ch;font-size:1.02rem}
+.counter{background:#0e1830aa;border:1px solid #f6c66b44;border-radius:16px;padding:12px 18px;
+  text-align:center;backdrop-filter:blur(6px)}
+.counter .n{font-family:'Fraunces',serif;font-size:2rem;color:var(--sun);line-height:1}
+.counter .l{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+/* tabs */
+.tabs{display:flex;gap:8px;margin:26px 0 18px;opacity:0;animation:rise .8s .18s cubic-bezier(.2,.8,.2,1) forwards}
+.tab{font-family:'Karla';font-weight:700;font-size:.95rem;color:var(--muted);background:#0e183055;
+  border:1px solid #ffffff14;padding:10px 20px;border-radius:999px;cursor:pointer;transition:.25s}
+.tab:hover{color:var(--ink)}
+.tab.active{background:linear-gradient(135deg,var(--gold),var(--ember));color:#2a1c08;border-color:transparent}
+
+.panel{display:none;animation:rise .55s cubic-bezier(.2,.8,.2,1)}
+.panel.active{display:block}
+
+/* capture layout */
+.capture{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}
+@media(max-width:820px){.capture{grid-template-columns:1fr}}
+
+.viewfinder{position:relative;border-radius:22px;overflow:hidden;min-height:380px;
+  background:linear-gradient(180deg,#7fa8d4,#a9c4e0 55%,#e7d6c0);
+  border:1px solid #ffffff33;box-shadow:0 18px 50px #0a1228aa, inset 0 0 80px #ffffff22}
+.viewfinder .vsun{position:absolute;top:-40px;right:-30px;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,#fff6df,#ffe6a866 60%,transparent 72%)}
+.vf-hint{position:absolute;left:16px;bottom:14px;background:#0e1830bb;color:#fff;font-size:.8rem;
+  padding:7px 12px;border-radius:10px;backdrop-filter:blur(4px);letter-spacing:.02em}
+.cloud-svg{position:absolute;cursor:pointer;filter:drop-shadow(0 8px 10px #5a6b8055);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1);animation:bob 7s ease-in-out infinite}
+.cloud-svg:hover{transform:scale(1.06) translateY(-4px)}
+.cloud-svg.sel{transform:scale(1.1)}
+.cloud-svg.sel .ring{opacity:1}
+.cloud-svg.caught{opacity:.28;pointer-events:none;filter:grayscale(.5)}
+.ring{opacity:0;transition:.3s}
+@keyframes bob{0%,100%{margin-top:0}50%{margin-top:-12px}}
+
+.scanbar{margin-top:16px;display:flex;gap:12px;align-items:center}
+.btn{font-family:'Karla';font-weight:700;border:none;cursor:pointer;border-radius:999px;
+  padding:13px 24px;font-size:.96rem;transition:.2s;letter-spacing:.01em}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--ember));color:#2a1c08;
+  box-shadow:0 8px 22px #e8884c44}
+.btn-primary:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 12px 28px #e8884c66}
+.btn-ghost{background:#0e183066;color:var(--ink);border:1px solid #ffffff22}
+.btn-ghost:not(:disabled):hover{background:#0e1830aa}
+
+/* result card */
+.result{background:var(--card);color:var(--card-ink);border-radius:22px;padding:24px;
+  box-shadow:0 18px 50px #0a1228aa;border:1px solid #ffffff55;min-height:380px;
+  display:flex;flex-direction:column}
+.result .empty{margin:auto;text-align:center;color:var(--card-sub)}
+.result .empty .big{font-family:'Fraunces';font-size:1.3rem;color:var(--card-ink);margin-bottom:6px}
+.sticker-stage{position:relative;align-self:center;margin:4px 0 14px;border-radius:16px;
+  background-image:linear-gradient(45deg,#0000000a 25%,transparent 25%,transparent 75%,#0000000a 75%),
+    linear-gradient(45deg,#0000000a 25%,transparent 25%,transparent 75%,#0000000a 75%);
+  background-size:16px 16px;background-position:0 0,8px 8px;padding:14px}
+.spec-name{font-family:'Fraunces',serif;font-weight:700;font-size:1.7rem;line-height:1.05}
+.spec-lore{font-style:italic;color:var(--card-sub);margin:8px 0 14px;font-size:1.02rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;color:#fff}
+.chip.verdict{background:#2a3147;color:#fff;text-transform:none;letter-spacing:0;font-weight:600}
+.result .file-btn{margin-top:auto}
+.shimmer{align-self:center;margin:auto;text-align:center;color:var(--card-sub)}
+.shimmer .scope{width:64px;height:64px;border:4px solid #d9d2c4;border-top-color:var(--ember);
+  border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* dex grid */
+.dex-empty{text-align:center;color:var(--muted);padding:70px 0}
+.dex-empty .big{font-family:'Fraunces';font-size:1.4rem;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+.dcard{background:var(--card);color:var(--card-ink);border-radius:18px;padding:14px;
+  box-shadow:0 12px 30px #0a122888;border:1px solid #ffffff55;animation:pop .5s cubic-bezier(.2,.9,.3,1.3)}
+.dcard .top{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;
+  color:var(--card-sub);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.dcard .stage{background:linear-gradient(180deg,#cfe0f2,#eadfce);border-radius:12px;padding:10px;
+  display:flex;justify-content:center}
+.dcard h3{font-family:'Fraunces';font-size:1.12rem;margin:10px 2px 2px}
+.dcard .l{font-size:.85rem;color:var(--card-sub);font-style:italic;margin:0 2px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
+footer{margin-top:40px;text-align:center;color:#ffffff66;font-size:.8rem}
+footer code{color:var(--sun)}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+
+<!-- shared cloud gradients/filters -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <radialGradient id="cg" cx="40%" cy="32%" r="75%">
+    <stop offset="0%" stop-color="#ffffff"/>
+    <stop offset="62%" stop-color="#f4f7fb"/>
+    <stop offset="100%" stop-color="#cdd8e8"/>
+  </radialGradient>
+</defs></svg>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Nepho<span class="cloud">dex</span></h1>
+      <p>A field journal for cloud-gazers. Pick a cloud from the sky, scan it, and a small local model names the shape it sees.</p>
+    </div>
+    <div class="counter"><div class="n" id="count">0</div><div class="l">Specimens</div></div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="capture" onclick="switchTab('capture')">🔭 Capture</div>
+    <div class="tab" data-tab="dex" onclick="switchTab('dex')">📔 My Nephodex</div>
+  </div>
+
+  <!-- CAPTURE -->
+  <section class="panel active" id="capture">
+    <div class="capture">
+      <div>
+        <div class="viewfinder" id="viewfinder">
+          <div class="vsun"></div>
+          <div class="vf-hint">Tap a cloud, then Scan</div>
+        </div>
+        <div class="scanbar">
+          <button class="btn btn-primary" id="scanBtn" disabled onclick="scan()">🔍 Isolate &amp; name</button>
+          <button class="btn btn-ghost" onclick="reshuffle()">🔄 New sky</button>
+        </div>
+      </div>
+
+      <div class="result" id="result">
+        <div class="empty">
+          <div class="big">Nothing scanned yet</div>
+          <div>Pick a cloud on the left and press <b>Scan</b>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEX -->
+  <section class="panel" id="dex">
+    <div id="dexBody">
+      <div class="dex-empty"><div class="big">Your Nephodex is empty</div><div>Catch a cloud to begin your collection.</div></div>
+    </div>
+  </section>
+
+  <footer>Static demo · faked pipeline · real version wires this to <code>MobileSAM → CLIP → SmolVLM2</code></footer>
+</div>
+
+<script>
+/* ---------- mock specimen pool ---------- */
+const POOL = [
+  {name:"The Drowsy Leviathan", lore:"A great whale dozing on its back, fins folded against the dusk.", rarity:"rare"},
+  {name:"Sir Reginald Fluff",   lore:"A pompous poodle mid-strut, nose tilted at the horizon.", rarity:"common"},
+  {name:"The Origami Heron",    lore:"One careful fold away from taking flight over the rooftops.", rarity:"uncommon"},
+  {name:"Molten Anvil",         lore:"A blacksmith's anvil glowing at its edges, forged from late light.", rarity:"rare"},
+  {name:"The Cotton Kraken",    lore:"Seven soft arms reaching lazily through a sea of blue.", rarity:"epic"},
+  {name:"Pocket Dragon",        lore:"A small dragon curled around an updraft, breathing gold.", rarity:"uncommon"},
+  {name:"Grandpa's Beard",      lore:"A long white beard combed flat by a patient afternoon wind.", rarity:"common"},
+  {name:"The Wandering Turtle", lore:"An ancient shell drifting east, in no hurry to arrive.", rarity:"uncommon"},
+  {name:"Marshmallow Bison",    lore:"A heavy, gentle thing grazing the upper meadows of the sky.", rarity:"rare"},
+  {name:"The Last Sailboat",    lore:"A single sail catching the very last of the daylight.", rarity:"epic"},
+];
+const RAR = {common:["Common","var(--common)"],uncommon:["Uncommon","var(--uncommon)"],
+             rare:["Rare","var(--rare)"],epic:["Epic","var(--epic)"]};
+
+/* cloud silhouettes: lists of bumps {cx,cy,r} in a ~180x110 box */
+const SHAPES = [
+  [[55,70,34],[95,55,42],[135,72,30],[78,82,28],[120,84,26]],
+  [[50,68,30],[82,50,38],[120,58,34],[150,74,24],[95,82,30]],
+  [[60,72,38],[100,60,30],[128,74,28],[80,84,24]],
+  [[48,70,28],[78,58,34],[110,52,38],[142,68,30],[110,82,28]],
+  [[58,66,36],[92,58,30],[118,66,32],[88,82,26],[128,82,22]],
+];
+let shapeIdx = 0;
+
+function cloudSVG(shape, w=180, h=110, ring=true){
+  let bumps = shape.map(([cx,cy,r])=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#cg)"/>`).join("");
+  let ringEl = ring ? `<ellipse class="ring" cx="90" cy="68" rx="86" ry="48" fill="none" stroke="#e8a73c" stroke-width="4" stroke-dasharray="6 7"/>` : "";
+  return `<svg viewBox="0 0 180 120" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${ringEl}${bumps}</svg>`;
+}
+
+/* ---------- state ---------- */
+let collection = [];
+let selected = null;     // {el, shape}
+let pending = null;
+
+/* ---------- build sky ---------- */
+const POS = [
+  {l:"8%", t:"14%", s:1.0, d:"0s"},
+  {l:"46%",t:"8%",  s:0.8, d:"1.4s"},
+  {l:"62%",t:"40%", s:1.15,d:"0.6s"},
+  {l:"14%",t:"52%", s:0.9, d:"2.1s"},
+  {l:"40%",t:"58%", s:0.7, d:"1s"},
+];
+function buildSky(){
+  const vf = document.getElementById("viewfinder");
+  vf.querySelectorAll(".cloud-svg").forEach(e=>e.remove());
+  selected=null; document.getElementById("scanBtn").disabled=true;
+  POS.forEach((p,i)=>{
+    const shape = SHAPES[(shapeIdx+i)%SHAPES.length];
+    const wrap = document.createElement("div");
+    wrap.className="cloud-svg";
+    wrap.style.left=p.l; wrap.style.top=p.t; wrap.style.animationDelay=p.d;
+    wrap.style.width=(170*p.s)+"px";
+    wrap.innerHTML=cloudSVG(shape,170*p.s,104*p.s);
+    wrap.dataset.shape=i;
+    wrap.onclick=()=>selectCloud(wrap,shape);
+    vf.appendChild(wrap);
+  });
+}
+function reshuffle(){ shapeIdx=(shapeIdx+2)%SHAPES.length; buildSky(); resetResult(); }
+
+function selectCloud(el,shape){
+  document.querySelectorAll(".cloud-svg").forEach(c=>c.classList.remove("sel"));
+  el.classList.add("sel");
+  selected={el,shape};
+  document.getElementById("scanBtn").disabled=false;
+}
+
+/* ---------- scan (faked) ---------- */
+function resetResult(){
+  document.getElementById("result").innerHTML =
+    `<div class="empty"><div class="big">Nothing scanned yet</div>
+     <div>Pick a cloud on the left and press <b>Scan</b>.</div></div>`;
+}
+function scan(){
+  if(!selected) return;
+  const res=document.getElementById("result");
+  res.innerHTML=`<div class="shimmer"><div class="scope"></div>Reading the sky…</div>`;
+  document.getElementById("scanBtn").disabled=true;
+  setTimeout(()=>reveal(),1100);
+}
+function reveal(){
+  const pick = POOL[Math.floor(Math.random()*POOL.length)];
+  const sim = collection.length===0 ? null : Math.floor(35+Math.random()*45);
+  let verdict;
+  if(collection.length===0) verdict="🌱 First cloud found! Your Nephodex has begun.";
+  else if(sim>78) verdict=`⚠️ Twin of an existing specimen — ${sim}% match.`;
+  else verdict=`✨ New specimen! Closest match in your dex is only ${sim}%.`;
+
+  const [rlabel,rcolor]=RAR[pick.rarity];
+  pending={...pick};
+  const res=document.getElementById("result");
+  res.innerHTML=`
+    <div class="sticker-stage">${cloudSVG(selected.shape,200,124,false)}</div>
+    <div class="chips">
+      <span class="chip" style="background:${rcolor}">${rlabel}</span>
+      <span class="chip verdict">${verdict}</span>
+    </div>
+    <div class="spec-name">${pick.name}</div>
+    <div class="spec-lore">“${pick.lore}”</div>
+    <button class="btn btn-primary file-btn" onclick="fileIt()">✨ File in my Nephodex</button>`;
+}
+function fileIt(){
+  if(!pending) return;
+  collection.push({...pending, shape:selected.shape, date:today()});
+  document.getElementById("count").textContent=collection.length;
+  selected.el.classList.add("caught"); selected.el.classList.remove("sel");
+  selected=null; pending=null;
+  renderDex();
+  resetResult();
+}
+function today(){
+  return new Date().toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+
+/* ---------- dex ---------- */
+function renderDex(){
+  const body=document.getElementById("dexBody");
+  if(collection.length===0){
+    body.innerHTML=`<div class="dex-empty"><div class="big">Your Nephodex is empty</div>
+      <div>Catch a cloud to begin your collection.</div></div>`;
+    return;
+  }
+  body.innerHTML=`<div class="grid">${collection.map((c,i)=>{
+    const [rl,rc]=RAR[c.rarity];
+    return `<div class="dcard">
+      <div class="top"><span>No.${String(i+1).padStart(3,"0")}</span>
+        <span><span class="dot" style="background:${rc}"></span>${rl}</span></div>
+      <div class="stage">${cloudSVG(c.shape,150,92,false)}</div>
+      <h3>${c.name}</h3>
+      <div class="l">Caught ${c.date}</div>
+    </div>`;}).join("")}</div>`;
+}
+
+/* ---------- tabs + stars ---------- */
+function switchTab(name){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===name));
+}
+(function stars(){
+  const s=document.getElementById("stars");
+  for(let i=0;i<40;i++){
+    const d=document.createElement("div"); d.className="star";
+    d.style.left=Math.random()*100+"%"; d.style.top=Math.random()*60+"%";
+    d.style.animationDelay=(Math.random()*4)+"s";
+    s.appendChild(d);
+  }
+})();
+
+buildSky();
+</script>
+</body>
+</html>
